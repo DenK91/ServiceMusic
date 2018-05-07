@@ -12,11 +12,10 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.SeekBar;
 
 import java.util.ArrayList;
@@ -79,22 +78,19 @@ public class MainActivity extends AppCompatActivity {
     void showListMusic() {
         getMusic();
 
-        ListView mListView = findViewById(R.id.listView1);
-        String[] names = new String[mMusicList.size()];
-        for (int i = 0; i < mMusicList.size(); i++) {
-            names[i] = mMusicList.get(i).getName();
-        }
-        mListView.setAdapter(new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, names));
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
+        RecyclerView trackListView = findViewById(R.id.trackList);
+        trackListView.setLayoutManager(new LinearLayoutManager(this));
+        TrackAdapter trackAdapter = new TrackAdapter();
+        trackAdapter.setTrackClickListener(new TrackHolder.TrackClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                MusicService.start(MainActivity.this, mMusicList.get(arg2).getPath());
+            public void onTrackClicked(Track track) {
+                MusicService.start(MainActivity.this, track.getPath());
                 startProgressListener();
                 updatePlayPauseBtn(true);
             }
         });
+        trackListView.setAdapter(trackAdapter);
+        trackAdapter.setTracks(mMusicList);
 
         playPause = findViewById(R.id.playPauseBtn);
         seekBar = findViewById(R.id.seek);

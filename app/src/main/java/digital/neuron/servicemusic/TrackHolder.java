@@ -4,6 +4,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import digital.neuron.servicemusic.data.Track;
+
 public class TrackHolder extends RecyclerView.ViewHolder {
 
     private Track track;
@@ -28,6 +30,6 @@ public class TrackHolder extends RecyclerView.ViewHolder {
 
     public void bind(Track track) {
         this.track = track;
-        trackName.setText(track.getName());
+        trackName.setText(track.getArtist().getName() + " - " + track.getName());
     }
 }

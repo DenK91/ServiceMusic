@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import digital.neuron.servicemusic.data.Track;
+
 public class TrackAdapter extends RecyclerView.Adapter<TrackHolder> {
 
     private List<Track> tracks = new ArrayList<>();

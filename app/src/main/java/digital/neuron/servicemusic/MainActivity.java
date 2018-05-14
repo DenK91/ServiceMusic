@@ -4,11 +4,9 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,17 +19,23 @@ import android.widget.SeekBar;
 import java.util.ArrayList;
 import java.util.List;
 
+import digital.neuron.servicemusic.data.Albom;
+import digital.neuron.servicemusic.data.Track;
+import digital.neuron.servicemusic.network.MusicApi;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 @RuntimePermissions
 public class MainActivity extends AppCompatActivity {
 
-    private List<Track> mMusicList = new ArrayList<>();
     private MusicController controller;
     private Handler handler;
     private ImageView playPause;
     private SeekBar seekBar;
+    private TrackAdapter trackAdapter;
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -76,11 +80,9 @@ public class MainActivity extends AppCompatActivity {
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE )
     void showListMusic() {
-        getMusic();
-
         RecyclerView trackListView = findViewById(R.id.trackList);
         trackListView.setLayoutManager(new LinearLayoutManager(this));
-        TrackAdapter trackAdapter = new TrackAdapter();
+        trackAdapter = new TrackAdapter();
         trackAdapter.setTrackClickListener(new TrackHolder.TrackClickListener() {
             @Override
             public void onTrackClicked(Track track) {
@@ -90,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         trackListView.setAdapter(trackAdapter);
-        trackAdapter.setTracks(mMusicList);
 
         playPause = findViewById(R.id.playPauseBtn);
         seekBar = findViewById(R.id.seek);
@@ -133,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
                 updatePlayPauseBtn(false);
             }
         });
+
+        getMusic();
     }
 
     private void updatePlayPauseBtn(boolean isPlaying) {
@@ -144,24 +147,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getMusic() {
-        final Cursor musicCursor = getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                new String[] { MediaStore.Audio.Media.DISPLAY_NAME, MediaStore.Audio.Media.DATA},
-                null,
-                null,
-                "LOWER(" + MediaStore.Audio.Media.TITLE + ") ASC");
-
-        if (musicCursor != null) {
-            mMusicList.clear();
-            if (musicCursor.moveToFirst()) {
-                do {
-                    mMusicList.add(new Track(
-                            musicCursor.getString(0),
-                            musicCursor.getString(1)));
-                } while (musicCursor.moveToNext());
+        MusicApi.getMusicService().getAlbom(null).enqueue(new Callback<List<Albom>>() {
+            @Override
+            public void onResponse(Call<List<Albom>> call, Response<List<Albom>> response) {
+                List<Track> tracks = new ArrayList<>();
+                for (Albom albom : response.body()) {
+                    tracks.addAll(albom.getTracks());
+                }
+                trackAdapter.setTracks(tracks);
             }
-            musicCursor.close();
-        }
+
+            @Override
+            public void onFailure(Call<List<Albom>> call, Throwable t) {
+
+            }
+        });
     }
 
     private void startProgressListener() {

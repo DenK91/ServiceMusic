@@ -48,10 +48,9 @@ public class MusicApi {
 
         @Override
         public Response intercept(Chain chain) throws IOException {
-            return chain.proceed(
-                    chain.request().newBuilder().url(chain.request().url().newBuilder()
-                            .addQueryParameter("APPID", "c995cd60b654b0aebbd2659eaee1b118")
-                            .build()).build());
+            return chain.proceed(chain.request().newBuilder()
+                    .addHeader("Authorization", "Basic dm92YW46bWFsb3k=")
+                    .build());
         }
     }
 }

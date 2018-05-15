@@ -5,11 +5,13 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MusicService extends Service implements MusicController {
 
@@ -18,6 +20,10 @@ public class MusicService extends Service implements MusicController {
     public final static String PATH = "path_key";
     private MyBinder binder = new MyBinder(this);
     private MediaPlayer mMediaPlayer;
+    private final static Map<String, String> headers = new HashMap<>();
+    static {
+        headers.put("Authorization", "Basic dm92YW46bWFsb3k=");
+    }
 
     public static void start(Context context, String path) {
         Intent intent = new Intent(context, MusicService.class);
@@ -73,7 +79,7 @@ public class MusicService extends Service implements MusicController {
     public void start(String path) {
         try {
             mMediaPlayer.reset();
-            mMediaPlayer.setDataSource(path);
+            mMediaPlayer.setDataSource(this, Uri.parse(path), headers);
             mMediaPlayer.prepare();
             mMediaPlayer.start();
         } catch (IOException e) {

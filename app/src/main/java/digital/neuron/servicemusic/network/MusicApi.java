@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MusicApi {
 
-    public static final String ENDPOINT = "https://music-api-den-k91.c9users.io/api/";
+    public static final String ENDPOINT = "https://hidden-castle-61020.herokuapp.com/api/";
 
     private Retrofit retrofit;
     private MusicService musicService;
